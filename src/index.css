@@ -111,7 +111,9 @@
 }
 
 .animate-logo-slider {
-  animation: infinite-slider 32s linear infinite;
+  animation: infinite-slider 28s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-pulse-ring {
@@ -152,3 +154,63 @@
   background: #38bdf8;
   color: #040732;
 }
+
+/* Animated gradient border for project cards */
+@keyframes gradient-border-spin {
+  0% {
+    --gradient-angle: 0deg;
+  }
+  100% {
+    --gradient-angle: 360deg;
+  }
+}
+
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.gradient-border-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.gradient-border-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--gradient-angle),
+    transparent 25%,
+    #38bdf8 37%,
+    #8b5cf6 50%,
+    #38bdf8 63%,
+    transparent 75%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gradient-border-card:hover::before {
+  opacity: 1;
+  animation: gradient-border-spin 2.5s linear infinite;
+}
+
+/* Premium Team Image Slant */
+@media (min-width: 1024px) {
+  .clip-team-even {
+    clip-path: polygon(0 0, 92% 0, 100% 100%, 0 100%);
+  }
+  .clip-team-odd {
+    clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+

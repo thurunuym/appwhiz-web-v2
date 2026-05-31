@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X, ArrowRight, Layers } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
 
 interface HeaderProps {
   onLetsTalkClick: () => void;
@@ -45,9 +45,9 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
   return (
     <header
       id="main-header"
-      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
         isScrolled
-          ? "border-b border-white/10 bg-brand-deep/80 py-3 shadow-[0_10px_30px_rgba(4,7,50,0.5)] backdrop-blur-md"
+          ? "border-b border-slate-200/60 bg-white/95 py-3 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl"
           : "bg-transparent py-5"
       }`}
     >
@@ -55,9 +55,8 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
         <div className="flex items-center justify-between">
           
           {/* Logo */}
-          <a href="#home" className="flex items-center gap-2">
-            <img src="/assets/logo.png" alt="AppWhiz Logo" className="h-8 w-8" />
-            <span className="font-sans text-base font-bold text-white hidden sm:inline">Appwhiz Solutions</span>
+          <a href="#home" className="flex items-center gap-2.5">
+            <img src="/assets/logo.png" alt="AppWhiz Logo" className="h-9 w-auto" />
           </a>
 
           {/* Desktop Navigation Links */}
@@ -69,15 +68,25 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
                   key={link.name}
                   href={link.href}
                   onClick={(e) => handleLinkClick(e, link.href)}
-                  className={`relative px-3.5 py-2 font-sans text-xs lg:text-[13px] font-medium transition-all ${
-                    isActive ? "text-white" : "text-slate-400 hover:text-white"
+                  className={`relative px-3.5 py-2 font-sans text-xs lg:text-[13px] font-medium transition-all duration-300 ${
+                    isScrolled
+                      ? isActive
+                        ? "text-brand-navy font-semibold"
+                        : "text-slate-500 hover:text-brand-navy"
+                      : isActive
+                        ? "text-white"
+                        : "text-slate-400 hover:text-white"
                   }`}
                 >
                   {link.name}
                   {isActive && (
                     <motion.div
                       layoutId="activeNavigationUnderline"
-                      className="absolute bottom-0 left-3.5 right-3.5 h-[2px] bg-gradient-to-r from-brand-accent to-brand-violet"
+                      className={`absolute bottom-0 left-3.5 right-3.5 h-[2px] ${
+                        isScrolled
+                          ? "bg-gradient-to-r from-brand-navy to-brand-violet"
+                          : "bg-gradient-to-r from-brand-accent to-brand-violet"
+                      }`}
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -91,9 +100,17 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
             <button
               id="header-talk-btn"
               onClick={onLetsTalkClick}
-              className="relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 font-sans text-[13px] font-semibold text-white transition-all cursor-pointer shadow-[0_0_20px_rgba(56,189,248,0.15)] group hover:shadow-[0_0_30px_rgba(96,165,250,0.3)]"
+              className={`relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 font-sans text-[13px] font-semibold transition-all cursor-pointer group ${
+                isScrolled
+                  ? "text-white shadow-[0_0_20px_rgba(4,25,97,0.2)] hover:shadow-[0_0_30px_rgba(4,25,97,0.35)]"
+                  : "text-white shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:shadow-[0_0_30px_rgba(96,165,250,0.3)]"
+              }`}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-mid via-brand-navy to-brand-violet transition-transform duration-300 group-hover:scale-105" />
+              <div className={`absolute inset-0 transition-transform duration-300 group-hover:scale-105 ${
+                isScrolled
+                  ? "bg-gradient-to-r from-brand-deep via-brand-navy to-brand-violet"
+                  : "bg-gradient-to-r from-brand-mid via-brand-navy to-brand-violet"
+              }`} />
               <span className="relative z-10 flex items-center gap-1.5">
                 Let's Talk
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
@@ -106,7 +123,11 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
             <button
               id="mobile-menu-toggle"
               onClick={() => setIsOpen(!isOpen)}
-              className="rounded-lg p-2 text-slate-300 hover:bg-white/5 hover:text-white transition-colors cursor-pointer"
+              className={`rounded-lg p-2 transition-colors cursor-pointer ${
+                isScrolled
+                  ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  : "text-slate-300 hover:bg-white/5 hover:text-white"
+              }`}
               aria-label="Toggle Navigation Menu"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -125,7 +146,11 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="md:hidden border-t border-white/10 bg-brand-deep/95 backdrop-blur-xl"
+            className={`md:hidden border-t backdrop-blur-xl ${
+              isScrolled
+                ? "border-slate-200/60 bg-white/95"
+                : "border-white/10 bg-brand-deep/95"
+            }`}
           >
             <div className="space-y-1.5 px-4 pt-3 pb-6">
               {navLinks.map((link) => {
@@ -136,9 +161,13 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
                     href={link.href}
                     onClick={(e) => handleLinkClick(e, link.href)}
                     className={`block rounded-lg px-4 py-3 font-sans text-sm font-medium transition-colors ${
-                      isActive 
-                        ? "bg-brand-mid/50 text-white border-l-2 border-brand-accent pl-3.5" 
-                        : "text-slate-400 hover:bg-white/5 hover:text-white"
+                      isScrolled
+                        ? isActive
+                          ? "bg-brand-navy/10 text-brand-navy border-l-2 border-brand-navy pl-3.5"
+                          : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                        : isActive 
+                          ? "bg-brand-mid/50 text-white border-l-2 border-brand-accent pl-3.5" 
+                          : "text-slate-400 hover:bg-white/5 hover:text-white"
                     }`}
                   >
                     {link.name}

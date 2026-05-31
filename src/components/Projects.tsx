@@ -65,7 +65,7 @@ export default function Projects({ onProjectClick }: ProjectsProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="group relative overflow-hidden rounded-3xl glass-panel p-6 md:p-10 lg:p-12 transition-all duration-300 hover:border-brand-accent/40"
+            className="group relative overflow-hidden rounded-3xl glass-panel gradient-border-card p-6 md:p-10 lg:p-12 transition-all duration-300 hover:border-brand-accent/40"
           >
             
             {/* Elegant Background Gradient Overlay */}
@@ -186,7 +186,7 @@ export default function Projects({ onProjectClick }: ProjectsProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.5, delay: idx * 0.12 }}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl glass-panel p-6 md:p-8 hover:border-brand-violet/40 transition-all duration-300 hover:-translate-y-1"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl glass-panel gradient-border-card p-6 md:p-8 hover:border-brand-violet/40 transition-all duration-300 hover:-translate-y-1"
             >
               <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-brand-violet/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 

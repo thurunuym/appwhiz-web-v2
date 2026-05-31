@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar as LucideCalendar, Clock, Check, ArrowRight } from "lucide-react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
+import LogoBar from "./components/LogoBar";
 import Services from "./components/Services";
 import Process from "./components/Process";
 import About from "./components/About";
@@ -107,6 +108,8 @@ export default function App() {
         onGetStartedClick={handleGetStartedClick}
         onViewProjectsClick={handleViewProjectsClick}
       />
+
+      <LogoBar />
       
       <Services onServiceLearnMore={(service) => setSelectedService(service)} />
       

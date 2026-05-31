@@ -1,29 +1,318 @@
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
-import { ArrowUpRight, ArrowDown, Terminal, Radio, Shield, HeartHandshake } from "lucide-react";
+import { ArrowUpRight, ArrowDown } from "lucide-react";
 
 interface HeroProps {
   onGetStartedClick: () => void;
   onViewProjectsClick: () => void;
 }
 
+/* ── Rotating 3D Globe built with pure canvas ── */
+function TechGlobe() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const animRef = useRef<number>(0);
+  const rotationRef = useRef({ x: -0.3, y: 0 });
+  const dragRef = useRef({ dragging: false, lastX: 0, lastY: 0 });
+  const velocityRef = useRef({ x: 0.003, y: 0 });
+  const [size, setSize] = useState(400);
+
+  // Responsive sizing
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const w = containerRef.current.clientWidth;
+        const h = containerRef.current.clientHeight;
+        setSize(Math.min(w, h, 500));
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    dragRef.current = { dragging: true, lastX: e.clientX, lastY: e.clientY };
+    velocityRef.current = { x: 0, y: 0 };
+  }, []);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragRef.current.dragging) return;
+    const dx = e.clientX - dragRef.current.lastX;
+    const dy = e.clientY - dragRef.current.lastY;
+    rotationRef.current.y += dx * 0.005;
+    rotationRef.current.x += dy * 0.005;
+    rotationRef.current.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotationRef.current.x));
+    velocityRef.current = { x: dx * 0.002, y: dy * 0.002 };
+    dragRef.current.lastX = e.clientX;
+    dragRef.current.lastY = e.clientY;
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    dragRef.current.dragging = false;
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+    ctx.scale(dpr, dpr);
+
+    const R = size * 0.38;
+    const cx = size / 2;
+    const cy = size / 2;
+
+    // Dot-grid points on the sphere
+    const dots: { lat: number; lon: number; s: number }[] = [];
+    for (let lat = -80; lat <= 80; lat += 8) {
+      const rLat = (lat * Math.PI) / 180;
+      const count = Math.round(Math.cos(rLat) * 44);
+      for (let i = 0; i < count; i++) {
+        const lon = (i / count) * 360 - 180;
+        dots.push({ lat, lon: lon, s: 0.6 + Math.random() * 0.6 });
+      }
+    }
+
+    // Connection arcs between random cities
+    const arcs = [
+      { from: { lat: 40, lon: -74 }, to: { lat: 51, lon: 0 } },
+      { from: { lat: 35, lon: 139 }, to: { lat: -33, lon: 151 } },
+      { from: { lat: 1, lon: 103 }, to: { lat: 48, lon: 2 } },
+      { from: { lat: 28, lon: 77 }, to: { lat: 55, lon: 37 } },
+      { from: { lat: -23, lon: -46 }, to: { lat: 40, lon: -3 } },
+    ];
+
+    function project(lat: number, lon: number): { x: number; y: number; z: number } {
+      const phi = (lat * Math.PI) / 180;
+      const theta = (lon * Math.PI) / 180;
+      const rX = rotationRef.current.x;
+      const rY = rotationRef.current.y;
+
+      let x = R * Math.cos(phi) * Math.sin(theta);
+      let y = R * Math.sin(phi);
+      let z = R * Math.cos(phi) * Math.cos(theta);
+
+      // Rotate around Y
+      const x1 = x * Math.cos(rY) - z * Math.sin(rY);
+      const z1 = x * Math.sin(rY) + z * Math.cos(rY);
+      x = x1;
+      z = z1;
+
+      // Rotate around X
+      const y1 = y * Math.cos(rX) - z * Math.sin(rX);
+      const z2 = y * Math.sin(rX) + z * Math.cos(rX);
+      y = y1;
+      z = z2;
+
+      return { x: cx + x, y: cy - y, z };
+    }
+
+    let time = 0;
+
+    function draw() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, size, size);
+      time++;
+
+      // Auto-rotate when not dragging
+      if (!dragRef.current.dragging) {
+        rotationRef.current.y += 0.004;
+        // Dampen velocity
+        velocityRef.current.x *= 0.95;
+        velocityRef.current.y *= 0.95;
+      }
+
+      // Outer glow
+      const glowGrad = ctx.createRadialGradient(cx, cy, R * 0.8, cx, cy, R * 1.4);
+      glowGrad.addColorStop(0, "rgba(56, 189, 248, 0.06)");
+      glowGrad.addColorStop(0.5, "rgba(139, 92, 246, 0.03)");
+      glowGrad.addColorStop(1, "transparent");
+      ctx.fillStyle = glowGrad;
+      ctx.fillRect(0, 0, size, size);
+
+      // Globe sphere fill
+      const sphereGrad = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.3, 0, cx, cy, R);
+      sphereGrad.addColorStop(0, "rgba(11, 37, 110, 0.35)");
+      sphereGrad.addColorStop(0.6, "rgba(4, 25, 97, 0.2)");
+      sphereGrad.addColorStop(1, "rgba(4, 7, 50, 0.15)");
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.fillStyle = sphereGrad;
+      ctx.fill();
+
+      // Globe border ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.15)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Draw latitude lines
+      for (let lat = -60; lat <= 60; lat += 30) {
+        ctx.beginPath();
+        let started = false;
+        for (let lon = -180; lon <= 180; lon += 3) {
+          const p = project(lat, lon);
+          if (p.z < 0) { started = false; continue; }
+          if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.strokeStyle = `rgba(56, 189, 248, ${0.06 + Math.sin(time * 0.02) * 0.02})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+
+      // Draw longitude lines
+      for (let lon = -180; lon < 180; lon += 30) {
+        ctx.beginPath();
+        let started = false;
+        for (let lat = -90; lat <= 90; lat += 3) {
+          const p = project(lat, lon);
+          if (p.z < 0) { started = false; continue; }
+          if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.strokeStyle = `rgba(139, 92, 246, ${0.05 + Math.sin(time * 0.015 + lon) * 0.02})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+
+      // Draw dots
+      for (const dot of dots) {
+        const p = project(dot.lat, dot.lon);
+        if (p.z < 0) continue;
+        const alpha = 0.2 + (p.z / R) * 0.5;
+        const pulse = 0.8 + Math.sin(time * 0.03 + dot.lat * 0.1 + dot.lon * 0.05) * 0.2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, dot.s * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(56, 189, 248, ${alpha * 0.7})`;
+        ctx.fill();
+      }
+
+      // Draw arcs
+      for (let a = 0; a < arcs.length; a++) {
+        const arc = arcs[a];
+        const from = project(arc.from.lat, arc.from.lon);
+        const to = project(arc.to.lat, arc.to.lon);
+        if (from.z < 0 && to.z < 0) continue;
+
+        // Compute midpoint elevated above the globe surface
+        const steps = 30;
+        ctx.beginPath();
+        let firstVisible = true;
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const lat = arc.from.lat + (arc.to.lat - arc.from.lat) * t;
+          const lon = arc.from.lon + (arc.to.lon - arc.from.lon) * t;
+          // Elevate mid-points
+          const elevation = 1 + Math.sin(t * Math.PI) * 0.15;
+          const phi = (lat * Math.PI) / 180;
+          const theta = (lon * Math.PI) / 180;
+          const rX = rotationRef.current.x;
+          const rY = rotationRef.current.y;
+
+          let x = R * elevation * Math.cos(phi) * Math.sin(theta);
+          let y = R * elevation * Math.sin(phi);
+          let z = R * elevation * Math.cos(phi) * Math.cos(theta);
+
+          const x1 = x * Math.cos(rY) - z * Math.sin(rY);
+          const z1 = x * Math.sin(rY) + z * Math.cos(rY);
+          x = x1; z = z1;
+          const y1 = y * Math.cos(rX) - z * Math.sin(rX);
+          const z2 = y * Math.sin(rX) + z * Math.cos(rX);
+          y = y1; z = z2;
+
+          if (z < 0) { firstVisible = true; continue; }
+          if (firstVisible) { ctx.moveTo(cx + x, cy - y); firstVisible = false; }
+          else ctx.lineTo(cx + x, cy - y);
+        }
+
+        // Animated dash offset
+        const dashPhase = (time * 2 + a * 60) % 200;
+        ctx.setLineDash([4, 8]);
+        ctx.lineDashOffset = -dashPhase;
+        ctx.strokeStyle = `rgba(139, 92, 246, ${0.5 + Math.sin(time * 0.04 + a) * 0.2})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Glowing endpoint dots
+        if (from.z > 0) {
+          ctx.beginPath();
+          ctx.arc(from.x, from.y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(56, 189, 248, 0.9)";
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(from.x, from.y, 6, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(56, 189, 248, 0.15)";
+          ctx.fill();
+        }
+        if (to.z > 0) {
+          ctx.beginPath();
+          ctx.arc(to.x, to.y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(139, 92, 246, 0.9)";
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(to.x, to.y, 6, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(139, 92, 246, 0.15)";
+          ctx.fill();
+        }
+      }
+
+      // Traveling pulse along one arc
+      const activeArc = arcs[Math.floor(time / 150) % arcs.length];
+      const pulseT = ((time % 150) / 150);
+      const pLat = activeArc.from.lat + (activeArc.to.lat - activeArc.from.lat) * pulseT;
+      const pLon = activeArc.from.lon + (activeArc.to.lon - activeArc.from.lon) * pulseT;
+      const elevation = 1 + Math.sin(pulseT * Math.PI) * 0.15;
+      const pp = project(pLat, pLon);
+      // Apply elevation manually for pulse
+      if (pp.z > 0) {
+        ctx.beginPath();
+        ctx.arc(pp.x, pp.y, 4 + Math.sin(time * 0.1) * 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(56, 189, 248, 0.8)";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(pp.x, pp.y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(56, 189, 248, 0.12)";
+        ctx.fill();
+      }
+
+      animRef.current = requestAnimationFrame(draw);
+    }
+
+    animRef.current = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(animRef.current);
+  }, [size]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full h-full flex items-center justify-center relative cursor-grab active:cursor-grabbing select-none"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+    >
+      {/* Background tech grid */}
+      <div className="absolute inset-0 bg-[radial-gradient(#38bdf808_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.08),transparent_70%)] pointer-events-none" />
+      
+      <canvas
+        ref={canvasRef}
+        style={{ width: size, height: size }}
+        className="relative z-10"
+      />
+    </div>
+  );
+}
+
 export default function Hero({ onGetStartedClick, onViewProjectsClick }: HeroProps) {
-  // Mock stack logos representing our development capabilities for the logo ticker
-  const logos = [
-    { name: "React", icon: "⚛️" },
-    { name: "Next.js", icon: "▲" },
-    { name: "TypeScript", icon: "TS" },
-    { name: "Node.js", icon: "🟢" },
-    { name: "Swift", icon: "🍊" },
-    { name: "Kotlin", icon: "🟣" },
-    { name: "Flutter", icon: "💙" },
-    { name: "AWS", icon: "☁️" },
-    { name: "GraphQL", icon: "🚀" },
-    { name: "Docker", icon: "🐳" },
-  ];
-
-  // Double the list to allow infinite looping scroll
-  const duplicateLogos = [...logos, ...logos, ...logos];
-
   return (
     <section
       id="home"
@@ -94,98 +383,17 @@ export default function Hero({ onGetStartedClick, onViewProjectsClick }: HeroPro
 
           </div>
 
-          {/* Right Column: Premium IT Illustration with Gradients */}
+          {/* Right Column: Interactive 3D Globe */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="lg:col-span-5 relative w-full aspect-[4/3] sm:aspect-square lg:aspect-auto h-full min-h-[350px] md:min-h-[420px] rounded-3xl overflow-hidden self-center"
+            className="lg:col-span-5 relative w-full aspect-square lg:aspect-auto h-full min-h-[350px] md:min-h-[420px] rounded-3xl overflow-hidden self-center"
           >
             {/* Ambient Back Glow mesh of gradients */}
             <div className="absolute inset-x-8 inset-y-12 bg-gradient-to-tr from-brand-accent/30 via-indigo-500/25 to-brand-violet/30 blur-[60px] animate-pulse-ring pointer-events-none" />
             
-            {/* The Glassmorphic IT Device / Dashboard Container */}
-            <div className="absolute inset-0 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-lg shadow-2xl flex flex-col p-6 overflow-hidden">
-              {/* Window Controls */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-[#ef4444]/80" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-[#f59e0b]/80" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-[#10b981]/80" />
-                </div>
-                <span className="font-mono text-[9px] text-slate-500 tracking-wider">appwhiz-engine.sh</span>
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-              </div>
-              
-              {/* Central Abstract IT Graphic mapping */}
-              <div className="flex-grow flex flex-col justify-between relative">
-                
-                {/* Simulated Grid Matrix Overlay */}
-                <div className="absolute inset-0 bg-[radial-gradient(#ffffff04_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
-                
-                {/* Neon flow lines connecting components */}
-                <svg className="absolute inset-0 w-full h-full opacity-60 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="glow-line-1" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#38bdf8" />
-                      <stop offset="100%" stopColor="#8b5cf6" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M 50 150 Q 150 50 250 120 T 350 180" fill="none" stroke="url(#glow-line-1)" strokeWidth="1.5" strokeDasharray="4 4" />
-                  <path d="M 80 80 Q 200 200 300 80" fill="none" stroke="url(#glow-line-1)" strokeWidth="1.5" />
-                </svg>
-
-                {/* Simulated Cloud Endpoint Nodes with real Gradient Badges */}
-                <div className="relative z-10 flex justify-between items-start">
-                  <div className="rounded-xl border border-brand-accent/20 bg-brand-deep/80 p-3 shadow-lg">
-                    <span className="block font-mono text-[8px] text-brand-accent font-bold uppercase tracking-wider mb-1">Database API</span>
-                    <span className="font-sans text-xs font-semibold text-white">PostgreSQL Connected</span>
-                    <div className="mt-1.5 h-1 w-12 rounded bg-gradient-to-r from-brand-accent to-blue-500" />
-                  </div>
-                  
-                  <div className="rounded-xl border border-brand-violet/20 bg-brand-deep/80 p-3 shadow-lg text-right">
-                    <span className="block font-mono text-[8px] text-brand-violet font-bold uppercase tracking-wider mb-1">Cloud Engine</span>
-                    <span className="font-sans text-xs font-semibold text-white">Cloud Run Active</span>
-                    <div className="mt-1.5 h-1 w-12 ml-auto rounded bg-gradient-to-r from-brand-violet to-purple-500" />
-                  </div>
-                </div>
-
-                {/* Animated Core Cluster Block */}
-                <div className="my-auto relative flex justify-center items-center">
-                  <div className="absolute h-32 w-32 rounded-full bg-gradient-to-tr from-brand-accent/20 to-brand-violet/20 animate-spin" style={{ animationDuration: "20s" }} />
-                  <div className="absolute h-24 w-24 rounded-full bg-slate-950/80 border border-white/10 flex items-center justify-center backdrop-blur-md">
-                    <div className="text-center">
-                      <span className="block font-serif text-lg font-bold text-gradient">99.9%</span>
-                      <span className="block font-mono text-[8px] text-slate-500 uppercase tracking-widest">SLA Uptime</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Simulated Server Infrastructure status block with Gradient overlays */}
-                <div className="relative z-10 grid grid-cols-2 gap-3 mt-4">
-                  <div className="rounded-xl border border-white/5 bg-white/[0.01] p-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-mono text-[8px] text-slate-500 uppercase">Process.Memory</span>
-                      <span className="font-mono text-[8.5px] text-brand-accent font-semibold">14.2 MB</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full w-2/5 bg-gradient-to-r from-brand-accent to-blue-500 rounded-full" />
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border border-white/5 bg-white/[0.01] p-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-mono text-[8px] text-slate-500 uppercase">CDN.Response</span>
-                      <span className="font-mono text-[8.5px] text-brand-violet font-semibold">140ms</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full w-4/5 bg-gradient-to-r from-brand-violet to-purple-500 rounded-full" />
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
+            <TechGlobe />
           </motion.div>
 
         </div>
