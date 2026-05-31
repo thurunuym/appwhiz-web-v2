@@ -133,7 +133,7 @@ export default function Team() {
                 {/* Backlit glow */}
                 <div className={`absolute top-0 ${isEven ? 'left-0' : 'right-0'} h-full w-1/2 bg-gradient-to-br ${member.gradient} opacity-[0.02] group-hover:opacity-[0.05] blur-[40px] transition-all duration-700 pointer-events-none`} />
 
-                <div className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} min-h-[320px] lg:min-h-[380px]`}>
+                <div className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} min-h-[240px] lg:min-h-[280px]`}>
                   
                   {/* Image column — full height with angled edge */}
                   <div className={`relative w-full lg:w-[32%] xl:w-[28%] shrink-0 overflow-hidden ${isEven ? "clip-team-even" : "clip-team-odd"}`}>
@@ -141,7 +141,7 @@ export default function Team() {
                     <img
                       src={member.image}
                       alt={member.name}
-                      className="w-full h-full min-h-[280px] lg:min-h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-102"
+                      className="w-full h-full min-h-[200px] lg:min-h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-102"
                       style={{ willChange: "filter, transform" }}
                     />
 
@@ -151,44 +151,32 @@ export default function Team() {
                   </div>
 
                   {/* Text content column */}
-                  <div className={`flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-10 xl:p-14 ${isEven ? 'lg:pl-12 xl:pl-16' : 'lg:pr-12 xl:pr-16'}`}>
+                  <div className={`flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-8 xl:p-10 ${isEven ? 'lg:pl-10 xl:pl-12' : 'lg:pr-10 xl:pr-12'}`}>
                     
                     {/* Role badge */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className={`flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${member.gradient} text-white`}>
-                        {member.icon}
-                      </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      
                       <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-slate-500 font-medium">
                         {member.role}
                       </span>
                     </div>
 
                     {/* Name & Nickname */}
-                    <div className="mb-4">
-                      <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-white group-hover:text-gradient transition-colors duration-300">
+                    <div className="mb-2">
+                      <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-white group-hover:text-gradient transition-colors duration-300">
                         {member.name}
                       </h3>
-                      <span className="font-mono text-xs text-brand-accent tracking-normal font-medium mt-1 inline-block">
+                      <span className="font-mono text-xs text-brand-accent tracking-normal font-medium mt-0.5 inline-block">
                         "{member.nickname}"
                       </span>
                     </div>
 
                     {/* Bio */}
-                    <p className="font-sans text-[13px] sm:text-sm text-slate-300/90 leading-relaxed font-light mb-6 max-w-2xl">
+                    <p className="font-sans text-[12px] sm:text-sm text-slate-300/90 leading-relaxed font-light mb-0 max-w-2xl">
                       {member.bio}
                     </p>
 
-                    {/* Skills Mini-Badges */}
-                    <div className="flex flex-wrap gap-2">
-                      {member.badges.map(badge => (
-                        <span
-                          key={badge}
-                          className="rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-1.5 font-mono text-[10px] text-slate-400 tracking-wide group-hover:border-white/15 group-hover:text-slate-300 transition-all duration-300"
-                        >
-                          {badge}
-                        </span>
-                      ))}
-                    </div>
+                   
 
                   </div>
                 </div>

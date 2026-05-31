@@ -17,18 +17,11 @@ export default function LogoBar() {
   return (
     <section
       id="logo-bar"
-      className="relative overflow-hidden bg-black py-10 border-b border-white/5"
+      className="relative overflow-hidden bg-brand-deep py-6 border-b border-white/5"
     >
       {/* Top/bottom fade masks */}
-      <div className="absolute inset-y-0 left-0 w-24 sm:w-40 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-24 sm:w-40 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
-
-      {/* Label */}
-      <div className="text-center mb-6">
-        <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-slate-500">
-          Trusted By Industry Leaders
-        </span>
-      </div>
+      <div className="absolute inset-y-0 left-0 w-36 sm:w-64 bg-gradient-to-r from-brand-deep via-brand-deep/80 to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-36 sm:w-64 bg-gradient-to-l from-brand-deep via-brand-deep/80 to-transparent z-10 pointer-events-none" />
 
       {/* Scrolling Track */}
       <div className="flex animate-logo-slider" style={{ width: "max-content" }}>
