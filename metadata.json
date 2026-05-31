@@ -1,0 +1,6 @@
+{
+  "name": "AppWhiz Solutions",
+  "description": "Premium software development, web & mobile app engineering, IoT, and high-quality UI/UX design studio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
