@@ -80,7 +80,7 @@ export default function Contact({ onBookCallClick }: ContactProps) {
     // Replace placeholders with strings provided inside your dashboard
     emailjs
       .send(
-        "service_275n8sa",     // e.g., 'service_abc123'
+        "service_p92x1cp",     // e.g., 'service_abc123'
         "template_h47csl3",    // e.g., 'template_xyz456'
         templateParams,
         {
