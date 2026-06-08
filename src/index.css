@@ -204,6 +204,37 @@
   animation: gradient-border-spin 2.5s linear infinite;
 }
 
+/* Always-on animated border for Process step cards */
+.process-card-border {
+  position: relative;
+  overflow: hidden;
+  --card-anim-delay: 0s;
+}
+
+.process-card-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--gradient-angle),
+    transparent 20%,
+    #38bdf8 35%,
+    #8b5cf6 50%,
+    #38bdf8 65%,
+    transparent 80%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 1;
+  animation: gradient-border-spin 5s linear infinite;
+  animation-delay: var(--card-anim-delay);
+}
+
 /* Premium Team Image Slant */
 @media (min-width: 1024px) {
   .clip-team-even {

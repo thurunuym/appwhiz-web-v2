@@ -74,7 +74,7 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
               src={logoImg}
               alt="AppWhiz Logo"
               className={`w-auto object-contain transition-all duration-300 group-hover:scale-[1.03] ${
-                isScrolled ? "h-8" : "h-10"
+                isScrolled ? "h-8" : "h-13"
               }`}
             />
           </a>
