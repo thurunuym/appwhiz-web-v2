@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Phone, Mail, Clock, ShieldAlert, CheckCircle2, Copy, Sparkles, Send } from "lucide-react";
+import { Phone, Mail, ShieldAlert, CheckCircle2, Copy, Sparkles, Send } from "lucide-react";
 import { ContactSubmission } from "../types";
+// 1. Import the browser email module integration
+import emailjs from "@emailjs/browser";
 
 interface ContactProps {
   onBookCallClick: () => void;
 }
 
 export default function Contact({ onBookCallClick }: ContactProps) {
-  // Contact Form local state
   const [form, setForm] = useState<ContactSubmission>({
     fullName: "",
     email: "",
@@ -18,7 +19,6 @@ export default function Contact({ onBookCallClick }: ContactProps) {
     helpType: "",
   });
 
-  // State controls
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -42,10 +42,11 @@ export default function Contact({ onBookCallClick }: ContactProps) {
     }
   };
 
+  // 2. Core integration point with EmailJS API endpoint pipeline
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validations
+    // Form Validations
     const newErrors: Record<string, string> = {};
     if (!form.fullName.trim()) newErrors.fullName = "Full name is required.";
     if (!form.email.trim()) {
@@ -65,11 +66,37 @@ export default function Contact({ onBookCallClick }: ContactProps) {
 
     setIsSubmitting(true);
 
-    // Simulated API route trigger call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-    }, 1200);
+    // 3. Compile transaction payload parameters 
+    const templateParams = {
+      fullName: form.fullName,
+      email: form.email,
+      contactNumber: form.contactNumber,
+      companyName: form.companyName,
+      helpType: form.helpType,
+      projectDescription: form.projectDescription,
+    };
+
+    // 4. Fire the direct delivery request transmission
+    // Replace placeholders with strings provided inside your dashboard
+    emailjs
+      .send(
+        "service_eqr1s3l",     // e.g., 'service_abc123'
+        "template_h47csl3",    // e.g., 'template_xyz456'
+        templateParams,
+        "t3KORAOVydZi2lI39"      // e.g., 'user_L92kXjs...'
+      )
+      .then(
+        (response) => {
+          console.log("Email pipeline successful status:", response.status, response.text);
+          setIsSubmitting(false);
+          setIsSuccess(true);
+        },
+        (error) => {
+          console.error("Email dispatch failed completely:", error);
+          setIsSubmitting(false);
+          setErrors({ form: "Transmission failure over support architecture. Please use direct links below." });
+        }
+      );
   };
 
   const handleResetForm = () => {
@@ -87,16 +114,13 @@ export default function Contact({ onBookCallClick }: ContactProps) {
 
   return (
     <section id="contact" className="relative bg-brand-deep py-24 lg:py-32 border-t border-white/5">
-      {/* Background spotlights */}
       <div className="absolute top-1/3 left-0 h-96 w-96 rounded-full bg-brand-navy/35 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/3 right-0 h-96 w-96 rounded-full bg-brand-violet/10 blur-[130px] pointer-events-none" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Split Layout Container */}
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-start">
           
-          {/* Left Side: Branding, description & Call booking CTA */}
+          {/* Left Side Info Area */}
           <div className="lg:col-span-5 space-y-8">
             <div>
               <h2 className="font-mono text-xs font-semibold tracking-widest uppercase text-brand-accent">
@@ -106,13 +130,11 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                 Tell Us About Your Problem
               </h3>
               <div className="mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-brand-accent to-brand-violet" />
-              
               <p className="mt-6 font-sans text-sm sm:text-base text-slate-300 leading-relaxed font-light">
                 Share your current bottlenecks and goals. We will map the right software, web architectures, or wireless IoT/automation direction for your team.
               </p>
             </div>
 
-            {/* Fast-track discovery appointment area */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.01] p-6 space-y-4">
               <h4 className="font-sans text-sm font-semibold text-white flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-brand-accent animate-pulse" />
@@ -121,12 +143,8 @@ export default function Contact({ onBookCallClick }: ContactProps) {
               <p className="font-sans text-xs text-slate-400 leading-relaxed">
                 If you are ready to move quickly, bypass the form and book an interactive, direct 15-minute discovery call with our solutions director.
               </p>
-              
-              {/* Premium Glow effect Button for Booking */}
               <div className="pt-2 relative group inline-block w-full">
-                {/* Neon outer gradient ring */}
                 <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-brand-accent via-pink-500 to-brand-violet opacity-30 blur group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
-                
                 <button
                   id="book-discovery-call-btn"
                   onClick={onBookCallClick}
@@ -138,10 +156,9 @@ export default function Contact({ onBookCallClick }: ContactProps) {
             </div>
           </div>
 
-          {/* Right Side: Modern Glassmorphic Form Portal */}
+          {/* Right Side Form Portal */}
           <div className="lg:col-span-7">
             <div className="rounded-2xl glass-panel p-6 md:p-8">
-              
               <AnimatePresence mode="wait">
                 {!isSuccess ? (
                   <motion.form
@@ -157,9 +174,15 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                       Consultation Request
                     </h4>
 
-                    {/* Double column name / email on desktop */}
+                    {/* Network Fallback Error Banner */}
+                    {errors.form && (
+                      <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-400 font-sans">
+                        <ShieldAlert className="h-4 w-4 shrink-0" />
+                        <p>{errors.form}</p>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {/* Name input */}
                       <div>
                         <label htmlFor="fullname" className="block font-mono text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">
                           Full Name <span className="text-red-500">*</span>
@@ -172,15 +195,12 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                           onChange={handleChange}
                           placeholder="John Smith"
                           className={`w-full rounded-lg bg-white/5 border px-3.5 py-2.5 font-sans text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 transition-all ${
-                            errors.fullName
-                              ? "border-red-500/50 focus:ring-red-500/20"
-                              : "border-white/10 focus:border-brand-accent focus:ring-brand-accent/20"
+                            errors.fullName ? "border-red-500/50 focus:ring-red-500/20" : "border-white/10 focus:border-brand-accent focus:ring-brand-accent/20"
                           }`}
                         />
                         {errors.fullName && <p className="mt-1 font-sans text-[10px] text-red-400">{errors.fullName}</p>}
                       </div>
 
-                      {/* Email Address */}
                       <div>
                         <label htmlFor="email" className="block font-mono text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">
                           Email Address <span className="text-red-500">*</span>
@@ -193,9 +213,7 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                           onChange={handleChange}
                           placeholder="john@company.com"
                           className={`w-full rounded-lg bg-white/5 border px-3.5 py-2.5 font-sans text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 transition-all ${
-                            errors.email
-                              ? "border-red-500/50 focus:ring-red-500/20"
-                              : "border-white/10 focus:border-brand-accent focus:ring-brand-accent/20"
+                            errors.email ? "border-red-500/50 focus:ring-red-500/20" : "border-white/10 focus:border-brand-accent focus:ring-brand-accent/20"
                           }`}
                         />
                         {errors.email && <p className="mt-1 font-sans text-[10px] text-red-400">{errors.email}</p>}
@@ -203,7 +221,6 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {/* Contact Number */}
                       <div>
                         <label htmlFor="contactnumber" className="block font-mono text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">
                           Contact Number <span className="text-red-500">*</span>
@@ -216,15 +233,12 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                           onChange={handleChange}
                           placeholder="+94 71 123 4567"
                           className={`w-full rounded-lg bg-white/5 border px-3.5 py-2.5 font-sans text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 transition-all ${
-                            errors.contactNumber
-                              ? "border-red-500/50 focus:ring-red-500/20"
-                              : "border-white/10 focus:border-brand-accent focus:ring-brand-accent/20"
+                            errors.contactNumber ? "border-red-500/50 focus:ring-red-500/20" : "border-white/10 focus:border-brand-accent focus:ring-brand-accent/20"
                           }`}
                         />
                         {errors.contactNumber && <p className="mt-1 font-sans text-[10px] text-red-400">{errors.contactNumber}</p>}
                       </div>
 
-                      {/* Company Name */}
                       <div>
                         <label htmlFor="companyname" className="block font-mono text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">
                           Company Name <span className="text-red-500">*</span>
@@ -237,16 +251,13 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                           onChange={handleChange}
                           placeholder="AppWhiz Global Ltd"
                           className={`w-full rounded-lg bg-white/5 border px-3.5 py-2.5 font-sans text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 transition-all ${
-                            errors.companyName
-                              ? "border-red-500/50 focus:ring-red-500/20"
-                              : "border-white/10 focus:border-brand-accent focus:ring-brand-accent/20"
+                            errors.companyName ? "border-red-500/50 focus:ring-red-500/20" : "border-white/10 focus:border-brand-accent focus:ring-brand-accent/20"
                           }`}
                         />
                         {errors.companyName && <p className="mt-1 font-sans text-[10px] text-red-400">{errors.companyName}</p>}
                       </div>
                     </div>
 
-                    {/* What Do You Need Help With select */}
                     <div>
                       <label htmlFor="helptype" className="block font-mono text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">
                         What Do You Need Help With? <span className="text-red-500">*</span>
@@ -256,10 +267,8 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                         name="helpType"
                         value={form.helpType}
                         onChange={handleChange}
-                        className={`w-full rounded-lg bg-brand-deep/90 border px-3.5 py-2.5 font-sans text-xs text-slate-300 focus:outline-none focus:ring-2 focus:border-brand-accent transition-all ${
-                          errors.helpType
-                            ? "border-red-500/5% focus:ring-red-500/20"
-                            : "border-white/10 focus:ring-brand-accent/20"
+                        className={`w-full rounded-lg bg-brand-deep/90 border px-3.5 py-2.5 font-sans text-xs text-slate-300 focus:outline-none focus:ring-2 transition-all ${
+                          errors.helpType ? "border-red-500/50 focus:ring-red-500/20" : "border-white/10 focus:ring-brand-accent/20 focus:border-brand-accent"
                         }`}
                       >
                         <option value="" disabled className="bg-brand-deep font-sans">-- Select core requirement --</option>
@@ -267,14 +276,13 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                         <option value="web" className="bg-brand-deep font-sans">Custom Responsive Web Development</option>
                         <option value="mobile" className="bg-brand-deep font-sans">iOS & Android App Engineering</option>
                         <option value="uiux" className="bg-brand-deep font-sans">UI/UX Systems & Wireframes</option>
-                        <option value="iot" className="bg-brand-deep font-sans">IoT Solutions & Sensors Telemery</option>
+                        <option value="iot" className="bg-brand-deep font-sans">IoT Solutions & Sensors Telemetry</option>
                         <option value="ai" className="bg-brand-deep font-sans">Generative AI Pipelines Integration</option>
                         <option value="other" className="bg-brand-deep font-sans">Other Solutions</option>
                       </select>
                       {errors.helpType && <p className="mt-1 font-sans text-[10px] text-red-400">{errors.helpType}</p>}
                     </div>
 
-                    {/* Describe project core details */}
                     <div>
                       <label htmlFor="description" className="block font-mono text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">
                         Describe Your Project <span className="text-red-500">*</span>
@@ -287,15 +295,12 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                         onChange={handleChange}
                         placeholder="Please tell us about your goals, current infrastructure, timeline ideas..."
                         className={`w-full rounded-lg bg-white/5 border px-3.5 py-2.5 font-sans text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 transition-all resize-none ${
-                          errors.projectDescription
-                            ? "border-red-500/50 focus:ring-red-500/20"
-                            : "border-white/10 focus:border-brand-accent focus:ring-brand-accent/20"
+                          errors.projectDescription ? "border-red-500/50 focus:ring-red-500/20" : "border-white/10 focus:border-brand-accent focus:ring-brand-accent/20"
                         }`}
                       />
                       {errors.projectDescription && <p className="mt-1 font-sans text-[10px] text-red-400">{errors.projectDescription}</p>}
                     </div>
 
-                    {/* Form submit button */}
                     <div className="pt-2">
                       <button
                         id="contact-form-submit-btn"
@@ -316,7 +321,6 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                         )}
                       </button>
                     </div>
-
                   </motion.form>
                 ) : (
                   <motion.div
@@ -337,7 +341,6 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                     <p className="mt-4 font-sans text-xs text-slate-500">
                       We have dispatched a summary review to <strong>{form.email}</strong>. Expect our response within 4-6 business hours.
                     </p>
-
                     <div className="mt-8">
                       <button
                         id="contact-success-reset"
@@ -350,13 +353,12 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                   </motion.div>
                 )}
               </AnimatePresence>
-
             </div>
           </div>
 
         </div>
 
-        {/* ----------------- Contact Information Cards Section ----------------- */}
+        {/* Channels Information Footer Block */}
         <div className="mt-20 border-t border-white/10 pt-16">
           <div className="text-center mb-10">
             <h4 className="font-mono text-xs font-semibold tracking-widest text-slate-400 uppercase">
@@ -366,17 +368,14 @@ export default function Contact({ onBookCallClick }: ContactProps) {
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 max-w-4xl mx-auto">
-            {/* Email Contact Card */}
             <motion.div
               whileHover={{ scale: 1.02 }}
               className="flex items-center gap-5 rounded-2xl glass-panel p-6 relative overflow-hidden group"
             >
               <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-brand-accent to-blue-500" />
-              
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-accent/10 text-brand-accent">
                 <Mail className="h-6 w-6" />
               </div>
-              
               <div className="flex-grow overflow-hidden">
                 <div className="font-mono text-[9px] text-slate-500 uppercase tracking-widest">Office Email</div>
                 <a
@@ -386,7 +385,6 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                   appwhizsolutions.official@gmail.com
                 </a>
               </div>
-
               <button
                 id="copy-email-btn"
                 onClick={() => handleCopyText("appwhizsolutions.official@gmail.com", "email")}
@@ -400,17 +398,14 @@ export default function Contact({ onBookCallClick }: ContactProps) {
               </button>
             </motion.div>
 
-            {/* Telephone Contact Card */}
             <motion.div
               whileHover={{ scale: 1.02 }}
               className="flex items-center gap-5 rounded-2xl glass-panel p-6 relative overflow-hidden group"
             >
               <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-brand-violet to-purple-500" />
-
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-violet/20 text-brand-violet">
                 <Phone className="h-6 w-6" />
               </div>
-
               <div className="flex-grow overflow-hidden">
                 <div className="font-mono text-[9px] text-slate-500 uppercase tracking-widest">Telephone</div>
                 <a
@@ -420,7 +415,6 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                   +94 71 643 5472
                 </a>
               </div>
-
               <button
                 id="copy-phone-btn"
                 onClick={() => handleCopyText("+94716435472", "phone")}
