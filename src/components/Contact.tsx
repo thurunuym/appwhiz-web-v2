@@ -80,10 +80,12 @@ export default function Contact({ onBookCallClick }: ContactProps) {
     // Replace placeholders with strings provided inside your dashboard
     emailjs
       .send(
-        "service_eqr1s3l",     // e.g., 'service_abc123'
+        "service_275n8sa",     // e.g., 'service_abc123'
         "template_h47csl3",    // e.g., 'template_xyz456'
         templateParams,
-        "t3KORAOVydZi2lI39"      // e.g., 'user_L92kXjs...'
+        {
+          publicKey: "t3KORAOVydZi2lI39"
+        }      // e.g., 'user_L92kXjs...'
       )
       .then(
         (response) => {
@@ -94,7 +96,7 @@ export default function Contact({ onBookCallClick }: ContactProps) {
         (error) => {
           console.error("Email dispatch failed completely:", error);
           setIsSubmitting(false);
-          setErrors({ form: "Transmission failure over support architecture. Please use direct links below." });
+          setErrors({ form: "Transmission failure over support architecture." });
         }
       );
   };
@@ -338,9 +340,7 @@ export default function Contact({ onBookCallClick }: ContactProps) {
                     <p className="mt-3 mx-auto max-w-md font-sans text-xs sm:text-sm text-slate-300 leading-relaxed">
                       Thank you, <strong>{form.fullName}</strong>. Your inquiry for <strong>{form.companyName}</strong> has been logged. Our solution designers are already reviewing your project description.
                     </p>
-                    <p className="mt-4 font-sans text-xs text-slate-500">
-                      We have dispatched a summary review to <strong>{form.email}</strong>. Expect our response within 4-6 business hours.
-                    </p>
+                    
                     <div className="mt-8">
                       <button
                         id="contact-success-reset"
