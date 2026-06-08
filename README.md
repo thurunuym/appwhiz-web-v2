@@ -9,3 +9,6 @@
 
  Run the app:
    `npm run dev`
+
+
+   Live link : https://appwhiz-web-v2.vercel.app/
