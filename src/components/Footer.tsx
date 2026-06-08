@@ -1,5 +1,6 @@
 import React from "react";
-import { Linkedin, Facebook, Instagram, Github, Layers } from "lucide-react";
+import { Linkedin, Facebook, Instagram, Github } from "lucide-react";
+import logoFooterImg from "../../assets/logo_footer.png";
 
 export default function Footer() {
   const quickLinks = [
@@ -20,7 +21,7 @@ export default function Footer() {
   };
 
   return (
-    <footer id="main-footer" className="relative bg-[#02031a] border-t-2 border-gradient-to-r border-transparent bg-clip-border">
+    <footer id="main-footer" className="relative bg-[#02031a]">
       {/* Visual top border gradient line */}
       <div className="h-[2px] w-full bg-gradient-to-r from-brand-accent/20 via-brand-violet/60 to-brand-accent/20" />
 
@@ -28,21 +29,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4 lg:grid-cols-12 lg:gap-12">
           
           {/* Column 1: Logo & Motto info block */}
-          <div className="md:col-span-2 lg:col-span-5 space-y-4">
-            <a href="#home" onClick={(e) => handleLinkClick(e, "#home")} className="group flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-gradient-to-br from-brand-mid to-brand-violet text-brand-accent shadow-[0_0_15px_rgba(56,189,248,0.25)]">
-                <Layers className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-serif text-lg font-bold tracking-tight text-white group-hover:text-brand-accent transition-colors">
-                AppWhiz Solutions
-              </span>
+          <div className="md:col-span-2 lg:col-span-5 flex flex-col items-start space-y-4">
+            <a href="#home" onClick={(e) => handleLinkClick(e, "#home")} className="group block">
+              <img
+                src={logoFooterImg}
+                alt="AppWhiz Logo"
+                className="h-26 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
+              />
             </a>
-            
-            <p className="font-serif text-[13px] italic text-slate-400 font-light max-w-sm">
-              "Code Your Vision with Creativity"
-            </p>
-            
-            <p className="font-sans text-xs text-slate-500 leading-relaxed max-w-md pt-2">
+            <p className="font-sans text-xs text-slate-400 leading-relaxed max-w-md text-justify">
               We specialize in custom web architectures, cross-platform mobile apps, secure databases, scalable microservices, and physical IoT endpoints. Designed and engineered for maximum digital leverage.
             </p>
           </div>
@@ -76,15 +71,15 @@ export default function Footer() {
               Drop by or start a project consult over our high-priority support queues.
             </p>
             <div className="space-y-1.5 font-sans text-xs text-slate-300">
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <span className="text-slate-500">Email:</span>
-                <a href="mailto:appwhizsolutions.official@gmail.com" className="hover:text-brand-accent transition-colors font-medium">
+                <a href="mailto:appwhizsolutions.official@gmail.com" className="hover:text-brand-accent transition-colors font-medium truncate">
                   appwhizsolutions.official@gmail.com
                 </a>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <span className="text-slate-500">Phone:</span>
-                <a href="tel:+94716435472" className="hover:text-brand-accent transition-colors font-medium">
+                <a href="tel:+94716435472" className="hover:text-brand-accent transition-colors font-medium whitespace-nowrap">
                   +94 71 643 5472
                 </a>
               </div>
@@ -100,7 +95,7 @@ export default function Footer() {
           <div className="flex items-center gap-4">
             {/* LinkedIn */}
             <a
-              href="https://www.linkedin.com"
+              href="https://www.linkedin.com/company/appwhiz-solutions/"
               target="_blank"
               rel="noreferrer"
               className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:bg-brand-accent hover:text-brand-deep hover:border-brand-accent hover:brightness-110 active:scale-95 transition-all"
@@ -111,7 +106,7 @@ export default function Footer() {
 
             {/* Facebook */}
             <a
-              href="https://www.facebook.com"
+              href="https://www.facebook.com/share/14irWeZVyeb/"
               target="_blank"
               rel="noreferrer"
               className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:bg-brand-accent hover:text-brand-deep hover:border-brand-accent hover:brightness-110 active:scale-95 transition-all"
@@ -122,10 +117,10 @@ export default function Footer() {
 
             {/* Instagram */}
             <a
-              href="https://www.instagram.com"
+              href="https://www.instagram.com/appwhiz_solutions"
               target="_blank"
               rel="noreferrer"
-              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:bg-brand-accent hover:text-brand-deep hover:border-brand-accent hover:brightness-110 active:scale-101 transition-all"
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:bg-brand-accent hover:text-brand-deep hover:border-brand-accent hover:brightness-110 active:scale-95 transition-all"
               aria-label="AppWhiz Instagram link"
             >
               <Instagram className="h-4 w-4" />
@@ -133,7 +128,7 @@ export default function Footer() {
 
             {/* GitHub */}
             <a
-              href="https://github.com"
+              href="https://github.com/AppWhiz-Solutions"
               target="_blank"
               rel="noreferrer"
               className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:bg-brand-accent hover:text-brand-deep hover:border-brand-accent hover:brightness-110 active:scale-95 transition-all"
@@ -148,7 +143,6 @@ export default function Footer() {
             <p className="font-mono text-[10px] text-slate-500">
               © 2026 AppWhiz Solutions. All rights reserved.
             </p>
-            
           </div>
 
         </div>

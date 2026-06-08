@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X, ArrowRight, Layers } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
+import logoImg from "../../assets/logo.png";
 
 interface HeaderProps {
   onLetsTalkClick: () => void;
@@ -10,14 +11,11 @@ interface HeaderProps {
 export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -42,22 +40,47 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
     }
   };
 
+  // When scrolled: blur unless hovering
+  const isBlurred = isScrolled && !isHovered;
+
   return (
     <header
       id="main-header"
-      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-400 ease-in-out ${
         isScrolled
-          ? "border-b border-white/10 bg-brand-deep/80 py-3 shadow-[0_10px_30px_rgba(4,7,50,0.5)] backdrop-blur-md"
-          : "bg-transparent py-5"
-      }`}
+          ? "border-b border-slate-200/30 shadow-sm shadow-slate-900/[0.04]"
+          : " border-transparent"
+      } ${
+        isBlurred
+          ? "bg-white/20 backdrop-blur-xl"
+          : "bg-white/95 backdrop-blur-sm"
+      } py-0`}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          
-          
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div
+          className={`flex items-center justify-between transition-all duration-300 ${
+            isScrolled ? "h-14" : "h-16"
+          }`}
+        >
+          {/* Logo */}
+          <a
+            href="#home"
+            onClick={(e) => handleLinkClick(e, "#home")}
+            className="group flex items-center gap-2.5 shrink-0"
+          >
+            <img
+              src={logoImg}
+              alt="AppWhiz Logo"
+              className={`w-auto object-contain transition-all duration-300 group-hover:scale-[1.03] ${
+                isScrolled ? "h-8" : "h-10"
+              }`}
+            />
+          </a>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-0.5 lg:gap-1">
             {navLinks.map((link) => {
               const isActive = activeSection === link.href.slice(1);
               return (
@@ -65,16 +88,20 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
                   key={link.name}
                   href={link.href}
                   onClick={(e) => handleLinkClick(e, link.href)}
-                  className={`relative px-3.5 py-2 font-sans text-xs lg:text-[13px] font-medium transition-all ${
-                    isActive ? "text-white" : "text-slate-400 hover:text-white"
+                  className={`relative px-3.5 py-2 rounded-md font-sans text-[12.5px] lg:text-[13px] font-medium tracking-[0.01em] transition-all duration-200 ${
+                    isActive
+                      ? "text-slate-900"
+                      : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
                   }`}
                 >
                   {link.name}
+
+                  {/* Active underline */}
                   {isActive && (
                     <motion.div
                       layoutId="activeNavigationUnderline"
-                      className="absolute bottom-0 left-3.5 right-3.5 h-[2px] bg-gradient-to-r from-brand-accent to-brand-violet"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      className="absolute bottom-1 left-3.5 right-3.5 h-[1.5px] rounded-full bg-gradient-to-r from-brand-accent to-brand-violet"
+                      transition={{ type: "spring", stiffness: 400, damping: 32 }}
                     />
                   )}
                 </a>
@@ -82,37 +109,43 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
             })}
           </nav>
 
-          {/* Let's Talk CTA button */}
-          <div className="hidden md:flex items-center">
+          {/* CTA */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* Subtle divider */}
+            <div className="h-5 w-px bg-slate-200" />
+
             <button
               id="header-talk-btn"
               onClick={onLetsTalkClick}
-              className="relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 font-sans text-[13px] font-semibold text-white transition-all cursor-pointer shadow-[0_0_20px_rgba(56,189,248,0.15)] group hover:shadow-[0_0_30px_rgba(96,165,250,0.3)]"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-slate-900 px-5 py-2.5 font-sans text-[12.5px] font-semibold text-white cursor-pointer transition-all duration-200 hover:bg-slate-800 hover:shadow-md hover:shadow-slate-900/20 active:scale-[0.97]"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-mid via-brand-navy to-brand-violet transition-transform duration-300 group-hover:scale-105" />
+              {/* Gradient shimmer overlay */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-r from-brand-mid/20 via-brand-violet/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              />
               <span className="relative z-10 flex items-center gap-1.5">
                 Let's Talk
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
               </span>
             </button>
           </div>
 
-          {/* Mobile hamburger menu button */}
+          {/* Mobile hamburger */}
           <div className="md:hidden">
             <button
               id="mobile-menu-toggle"
               onClick={() => setIsOpen(!isOpen)}
-              className="rounded-lg p-2 text-slate-300 hover:bg-white/5 hover:text-white transition-colors cursor-pointer"
+              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
-
         </div>
       </div>
 
-      {/* Mobile Drawer Dropdown Menu */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -120,10 +153,10 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="md:hidden border-t border-white/10 bg-brand-deep/95 backdrop-blur-xl"
+            transition={{ duration: 0.22, ease: "easeInOut" }}
+            className="md:hidden border-t border-slate-100 bg-white/98 backdrop-blur-xl"
           >
-            <div className="space-y-1.5 px-4 pt-3 pb-6">
+            <div className="space-y-0.5 px-4 pt-2 pb-6">
               {navLinks.map((link) => {
                 const isActive = activeSection === link.href.slice(1);
                 return (
@@ -131,29 +164,31 @@ export default function Header({ onLetsTalkClick, activeSection }: HeaderProps) 
                     key={link.name}
                     href={link.href}
                     onClick={(e) => handleLinkClick(e, link.href)}
-                    className={`block rounded-lg px-4 py-3 font-sans text-sm font-medium transition-colors ${
-                      isActive 
-                        ? "bg-brand-mid/50 text-white border-l-2 border-brand-accent pl-3.5" 
-                        : "text-slate-400 hover:bg-white/5 hover:text-white"
+                    className={`flex items-center justify-between rounded-lg px-4 py-2.5 font-sans text-[13px] font-medium transition-colors ${
+                      isActive
+                        ? "bg-slate-50 text-slate-900"
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
                     }`}
                   >
-                    {link.name}
+                    <span>{link.name}</span>
+                    {isActive && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-brand-accent" />
+                    )}
                   </a>
                 );
               })}
-              
-              {/* Talk button inside mobile menu */}
-              <div className="pt-4 px-4">
+
+              <div className="pt-3 px-1">
                 <button
                   id="mobile-drawer-talk-btn"
                   onClick={() => {
                     setIsOpen(false);
                     onLetsTalkClick();
                   }}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-mid to-brand-violet py-3 font-sans text-sm font-medium text-white shadow-lg cursor-pointer hover:opacity-90 active:scale-95 transition-transform"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 font-sans text-[13px] font-semibold text-white cursor-pointer hover:bg-slate-800 active:scale-[0.98] transition-all"
                 >
                   Let's Talk
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>

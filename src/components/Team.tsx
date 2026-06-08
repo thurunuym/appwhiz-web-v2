@@ -1,10 +1,10 @@
 import React from "react";
 import { motion } from "motion/react";
 import { Terminal, Zap, Megaphone, Palette } from "lucide-react";
-import dananjayaImg from "../../assets/dananjaya.jpeg";
-import janadaImg from "../../assets/janada.jpeg";
-import thusalImg from "../../assets/thusal.jpeg";
-import thurunuImg from "../../assets/thurunu.jpeg";
+import dananjayaImg from "../../assets/dananjaya.png";
+import janadaImg from "../../assets/janada.png";
+import thusalImg from "../../assets/thusal.png";
+import thurunuImg from "../../assets/thurunu.png";
 
 interface TeamMember {
   name: string;
@@ -22,7 +22,7 @@ export default function Team() {
   const team: TeamMember[] = [
     {
       name: "Dananjaya",
-      role: "CEO & Founder",
+      role: "Co-Founder",
       nickname: "The Tech Wizard",
       bio: "Need a mobile app? He'll build it. Need a robot? He'll build that too. Need a cinematic promo video for the robot and mobile app? Somehow, that's already rendering in the background. Dananjaya is our CEO, Founder, and unofficial supplier of impossible ideas. With expertise in mobile development, IoT, electronics, robotics, and video editing, he's living proof that 24 hours a day is apparently just a suggestion.",
       gradient: "from-cyan-500 via-blue-600 to-indigo-600",

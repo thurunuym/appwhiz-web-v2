@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
 import { ArrowUpRight, ArrowDown } from "lucide-react";
+import logoHeroImg from "../../assets/logo_hero.png";
 
 interface HeroProps {
   onGetStartedClick: () => void;
@@ -16,6 +17,16 @@ function TechGlobe() {
   const dragRef = useRef({ dragging: false, lastX: 0, lastY: 0 });
   const velocityRef = useRef({ x: 0.003, y: 0 });
   const [size, setSize] = useState(400);
+  const [logoImg, setLogoImg] = useState<HTMLImageElement | null>(null);
+
+  // Load logo image
+  useEffect(() => {
+    const img = new Image();
+    img.src = logoHeroImg;
+    img.onload = () => {
+      setLogoImg(img);
+    };
+  }, []);
 
   // Responsive sizing
   useEffect(() => {
@@ -152,7 +163,87 @@ function TechGlobe() {
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Draw latitude lines
+      // Draw back-facing latitude lines
+      for (let lat = -60; lat <= 60; lat += 30) {
+        ctx.beginPath();
+        let started = false;
+        for (let lon = -180; lon <= 180; lon += 3) {
+          const p = project(lat, lon);
+          if (p.z >= 0) { started = false; continue; }
+          if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.strokeStyle = `rgba(56, 189, 248, ${0.02 + Math.sin(time * 0.02) * 0.005})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+
+      // Draw back-facing longitude lines
+      for (let lon = -180; lon < 180; lon += 30) {
+        ctx.beginPath();
+        let started = false;
+        for (let lat = -90; lat <= 90; lat += 3) {
+          const p = project(lat, lon);
+          if (p.z >= 0) { started = false; continue; }
+          if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.strokeStyle = `rgba(139, 92, 246, ${0.015 + Math.sin(time * 0.015 + lon) * 0.005})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+
+      // Draw back-facing dots
+      for (const dot of dots) {
+        const p = project(dot.lat, dot.lon);
+        if (p.z >= 0) continue;
+        const alpha = 0.05 + (Math.abs(p.z) / R) * 0.1;
+        const pulse = 0.8 + Math.sin(time * 0.03 + dot.lat * 0.1 + dot.lon * 0.05) * 0.2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, dot.s * pulse * 0.7, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(56, 189, 248, ${alpha * 0.4})`;
+        ctx.fill();
+      }
+
+      // Draw immersed Logo
+      if (logoImg) {
+        const hoverOffset = Math.sin(time * 0.02) * 8; // subtle floating
+        const scalePulse = 1 + Math.sin(time * 0.015) * 0.02; // subtle pulse
+        
+        // Glow / Aura behind the logo
+        const logoGlow = ctx.createRadialGradient(cx, cy + hoverOffset, R * 0.1, cx, cy + hoverOffset, R * 0.5);
+        logoGlow.addColorStop(0, "rgba(56, 189, 248, 0.25)");
+        logoGlow.addColorStop(0.5, "rgba(139, 92, 246, 0.08)");
+        logoGlow.addColorStop(1, "transparent");
+        ctx.fillStyle = logoGlow;
+        ctx.beginPath();
+        ctx.arc(cx, cy + hoverOffset, R * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(cx, cy + hoverOffset);
+
+        // React to velocity/drag for an interactive tilt
+        const wobbleX = Math.sin(time * 0.01) * 0.02;
+        const wobbleY = Math.cos(time * 0.01) * 0.02;
+        const tiltX = wobbleX + velocityRef.current.y * 1.2;
+        const tiltY = wobbleY + velocityRef.current.x * 1.2;
+
+        // Apply dynamic scale and slight rotation
+        ctx.scale((1 - Math.min(0.2, Math.abs(tiltY))) * scalePulse, (1 - Math.min(0.2, Math.abs(tiltX))) * scalePulse);
+        ctx.rotate(wobbleX * 0.5 + velocityRef.current.x * 0.3);
+
+        ctx.globalAlpha = 0.88; // subtle transparency to blend with the globe
+        
+        // Draw the image
+        const logoSize = R * 0.85;
+        ctx.drawImage(logoImg, -logoSize / 2, -logoSize / 2, logoSize, logoSize);
+        
+        ctx.restore();
+        ctx.globalAlpha = 1.0; // reset alpha
+      }
+
+      // Draw front-facing latitude lines
       for (let lat = -60; lat <= 60; lat += 30) {
         ctx.beginPath();
         let started = false;
@@ -167,7 +258,7 @@ function TechGlobe() {
         ctx.stroke();
       }
 
-      // Draw longitude lines
+      // Draw front-facing longitude lines
       for (let lon = -180; lon < 180; lon += 30) {
         ctx.beginPath();
         let started = false;
@@ -182,7 +273,7 @@ function TechGlobe() {
         ctx.stroke();
       }
 
-      // Draw dots
+      // Draw front-facing dots
       for (const dot of dots) {
         const p = project(dot.lat, dot.lon);
         if (p.z < 0) continue;
@@ -288,7 +379,7 @@ function TechGlobe() {
 
     animRef.current = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(animRef.current);
-  }, [size]);
+  }, [size, logoImg]);
 
   return (
     <div

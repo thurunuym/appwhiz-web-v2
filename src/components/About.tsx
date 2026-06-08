@@ -26,13 +26,13 @@ export default function About() {
         setProjects(Math.floor((10 * currentStep) / steps));
         setRetention(parseFloat(((99.4 * currentStep) / steps).toFixed(1)));
         setExperience(Math.floor((4 * currentStep) / steps));
-        setDevelopers(Math.floor((10 * currentStep) / steps));
+        setDevelopers(Math.floor((5 * currentStep) / steps));
 
         if (currentStep >= steps) {
           setProjects(10);
           setRetention(99.4);
           setExperience(4);
-          setDevelopers(10);
+          setDevelopers(5);
           clearInterval(timer);
         }
       }, stepTime);
